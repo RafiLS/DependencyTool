@@ -1,0 +1,44 @@
+@startuml
+
+title Sequence Diagram - Dependency Risk Analysis (Level 2)
+skinparam monochrome true
+skinparam shadowing false
+
+actor User
+participant "CLI" as CLI <<component>>
+participant "Interface Adapters" as CTRL <<component>>
+participant "Infrastructure Services" as SRV <<component>>
+participant "Domain" as DOM <<component>>
+participant "Report" as Report <<component>>
+
+User -> CLI : run analysis command
+activate CLI
+
+CLI -> CTRL : command analysis
+activate CTRL
+
+CTRL -> CTRL : execute adapters (depcheck / dirty-waters)
+
+CTRL -> SRV : send analysis data
+activate SRV
+
+SRV -> DOM : process domain logic
+activate DOM
+DOM --> SRV : AnalysisResult
+deactivate DOM
+
+SRV -> Report : generate report
+activate Report
+Report --> SRV : formatted report
+deactivate Report
+
+SRV --> CTRL : final result
+deactivate SRV
+
+CTRL --> CLI : response
+deactivate CTRL
+
+CLI --> User : display report
+deactivate CLI
+
+@enduml

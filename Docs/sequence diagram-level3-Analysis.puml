@@ -1,0 +1,96 @@
+@startuml
+
+title Sequence Diagram - Dependency Risk Analysis (Level 3)
+skinparam monochrome true
+skinparam shadowing false
+
+actor User
+participant "CommandFormatter" as CLI <<CLI>>
+participant "Controller" as CTRL <<Interface Adapter>>
+participant "Depcheck Adapter" as DEP <<Interface Adapter>>
+participant "DirtyWaters Adapter" as DW <<Interface Adapter>>
+participant "AnalyserService" as SRV <<Infrastructure Services>>
+database "DependencyRepository" as REPO <<repository>>
+
+participant "DependencyDTO" as DTO <<Infrastructure Services>>
+participant "Dependency" as DEPDOM <<domain>>
+participant "Risk" as RISK <<domain>>
+participant "Smell" as SMELL <<domain>>
+
+participant "ReportGenerator" as Report <<Report>>
+
+User -> CLI : executeCommand("analyze")
+activate CLI
+
+CLI -> CLI : buildCommand()
+CLI -> CTRL : executeAnalysis(command)
+activate CTRL
+
+CTRL -> DEP : runDepcheck()
+activate DEP
+DEP --> CTRL : depcheckResults
+deactivate DEP
+
+CTRL -> DW : runDirtyWaters()
+activate DW
+DW --> CTRL : smellResults
+deactivate DW
+
+CTRL -> SRV : analyze(depcheckResults, smellResults)
+activate SRV
+
+SRV -> REPO : getDependencies()
+activate REPO
+REPO --> SRV : DependencyDTO
+deactivate REPO
+
+loop each Dependency
+
+    SRV -> DEPDOM : process(dependency)
+    activate DEPDOM
+    DEPDOM --> SRV : dependency
+    deactivate DEPDOM
+
+    SRV -> RISK : calculateRisk(dependency, depcheckResults, smellResults)
+    activate RISK
+    RISK --> SRV : riskValue
+    deactivate RISK
+
+    SRV -> SMELL : analyzeStructureAndDepth(dependency)
+    activate SMELL
+    SMELL --> SRV : result
+    deactivate SMELL
+
+    SRV -> SMELL : detectDuplicateDependencies(dependency)
+    activate SMELL
+    SMELL --> SRV : result
+    deactivate SMELL
+
+    SRV -> SMELL : detectBloatedDependencies(dependency)
+    activate SMELL
+    SMELL --> SRV : result
+    deactivate SMELL
+
+    SRV -> SMELL : checkMaintenanceStatus(dependency)
+    activate SMELL
+    SMELL --> SRV : result
+    deactivate SMELL
+
+end
+SRV -> SRV : mergeToolResults(depcheckResults, smellResults)
+
+SRV -> Report : generateReport(analysisResult)
+activate Report
+Report --> SRV : markdownReport
+deactivate Report
+
+SRV --> CTRL : analysisResult
+deactivate SRV
+
+CTRL --> CLI : response
+deactivate CTRL
+
+CLI --> User : displayReport()
+deactivate CLI
+
+@enduml

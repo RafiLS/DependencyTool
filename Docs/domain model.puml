@@ -1,0 +1,70 @@
+@startuml
+skinparam monochrome true
+skinparam packageStyle rectangle
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+hide circle
+hide methods
+
+title Domain Model
+
+class ReactApplication {
+name
+}
+
+class Dependency {
+name
+version
+type
+source
+isUsed
+isDeprecated
+lastUpdate
+}
+
+class DependencyTree {
+size
+depth
+}
+
+class SmellIndicator {
+severity
+description
+}
+
+class SupplyChainSmell {
+name
+type
+description
+}
+
+class Vulnerability {
+description
+severity
+}
+
+class Attack {
+name
+description
+impact
+}
+
+ReactApplication "1" -- "*" Dependency : contains >
+
+ReactApplication "1" -- "1" DependencyTree : has >
+
+DependencyTree "1" -- "*" Dependency : includes >
+
+Dependency "1" -- "*" SmellIndicator : has >
+
+SmellIndicator "*" -- "*" SupplyChainSmell : classifies >
+
+Dependency "*" -- "*" Vulnerability : has >
+
+Dependency "*" -- "*" Attack : increases risk of >
+
+SupplyChainSmell "*" -- "*" Attack : may enable >
+
+Vulnerability "*" -- "*" Attack : may lead to >
+
+@enduml

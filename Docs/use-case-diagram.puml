@@ -1,0 +1,13 @@
+@startuml
+
+left to right direction
+rectangle "User" as R {
+
+actor "User" as User
+
+usecase "Analyse React Project" as UC2
+
+User --> UC2
+}
+
+@enduml

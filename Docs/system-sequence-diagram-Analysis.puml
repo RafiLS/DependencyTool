@@ -1,0 +1,24 @@
+@startuml
+
+title SSD - React Dependency Risk Analysis
+skinparam monochrome true
+skinparam shadowing false
+
+autonumber
+
+actor User
+participant System
+
+User -> System : Navigate to project directory
+activate System
+System --> User : Project detected
+deactivate System
+
+User -> System : Request dependency risk analysis
+activate System
+
+System --> User : Report generated
+deactivate System
+
+
+@enduml
