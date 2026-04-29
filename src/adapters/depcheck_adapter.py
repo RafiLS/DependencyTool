@@ -15,9 +15,9 @@ class DepcheckAdapter:
         )
 
         if not result.stdout:
-            raise Exception("Depcheck não devolveu output")
+            raise Exception("Depcheck did not return any output")
 
         try:
             return json.loads(result.stdout)
         except json.JSONDecodeError:
-            raise Exception("Output do Depcheck inválido")
+            raise Exception("Invalid Depcheck output")
