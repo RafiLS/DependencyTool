@@ -11,7 +11,7 @@ class ReportGenerator:
         md = []
         md.append("# Dependency Analysis Report\n")
 
-        total_smells = 0
+        total_risks = 0
 
         # DEPCHECK
         md.append("# Depcheck\n")
@@ -20,17 +20,17 @@ class ReportGenerator:
         unused = depcheck_output.get("dependencies", []) + \
                  depcheck_output.get("devDependencies", [])
 
-        md.append(f"##-Unused dependencies ({len(unused)})")
+        md.append(f"## -Unused dependencies ({len(unused)})")
         if unused:
             md.extend([f"- {d}" for d in unused])
         else:
             md.append("- None")
 
-        total_smells += len(unused)
-
         # MISSING
         missing = depcheck_output.get("missing", {})
-        md.append(f"\n##-Missing dependencies ({len(missing)})")
+        missing_count = sum(len(files) for files in missing.values())
+
+        md.append(f"\n## -Missing dependencies ({len(missing)})")
 
         if missing:
             for dep, files in missing.items():
@@ -42,8 +42,6 @@ class ReportGenerator:
         else:
             md.append("- None")
 
-        total_smells += len(missing)
-
         # BLOATED
         bloated = depcheck_output.get("bloated", [])
         md.append(f"\n## Bloated dependencies ({len(bloated)})")
@@ -53,7 +51,8 @@ class ReportGenerator:
         else:
             md.append("- None")
 
-        total_smells += len(bloated)
+        depcheck_risks = len(unused) + missing_count + len(bloated)
+        total_risks += depcheck_risks
 
         # SNIFFER
         md.append("\n# DependencySniffer\n")
@@ -86,9 +85,11 @@ class ReportGenerator:
         else:
             md.append("- None")
 
-        total_smells += len(pinned) + len(url) + len(restrict) + len(perm) + len(risks)
+        sniffer_risks = len(pinned) + len(url) + len(restrict) + len(perm) + len(risks)
+        # Sniffer is heuristic indicators, not real risks
+
         # SNYK
-        md.append("\n#Snyk\n")
+        md.append("\n# Snyk\n")
 
         install = snyk_output.get("install_scripts", [])
         license_issues = snyk_output.get("license_anomalies", [])
@@ -98,28 +99,25 @@ class ReportGenerator:
         section("- Problematic licenses", license_issues)
         section("- Transitive dependencies", transitive)
 
-        total_smells += len(install) + len(license_issues) + len(transitive)
+        snyk_risks = len(install) + len(license_issues) + len(transitive)
+        total_risks += snyk_risks
 
         md.append("\n---\n")
         md.append("## General summary\n")
 
-        depcheck_total = len(unused) + len(missing) + len(bloated)
-        sniffer_total = len(pinned) + len(url) + len(restrict) + len(perm) + len(risks)
-        snyk_total = len(install) + len(license_issues) + len(transitive)
+        md.append(f"- Depcheck: {depcheck_risks} risk indicators")
+        md.append(f"- DependencySniffer: {sniffer_risks} heuristic indicators")
+        md.append(f"- Snyk: {snyk_risks} risk indicators")
 
-        md.append(f"- Depcheck: {depcheck_total} smells")
-        md.append(f"- DependencySniffer: {sniffer_total} smells")
-        md.append(f"- Snyk: {snyk_total} smells")
+        md.append(f"\n### TOTAL: {total_risks} risk indicators\n")
 
-        md.append(f"\n### TOTAL: {total_smells} smells\n")
-
-        if total_smells == 0:
-            md.append("- No smells detected.")
-        elif total_smells < 5:
-            md.append(f"- Low risk ({total_smells})")
-        elif total_smells < 15:
-            md.append(f"- Moderate risk ({total_smells})")
+        if total_risks == 0:
+            md.append("- No risk indicators detected.")
+        elif total_risks < 5:
+            md.append(f"- Low risk ({total_risks})")
+        elif total_risks < 15:
+            md.append(f"- Moderate risk ({total_risks})")
         else:
-            md.append(f"- High risk ({total_smells})")
+            md.append("- High risk ({total_risks})")
 
         return "\n".join(md)
