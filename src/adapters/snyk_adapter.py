@@ -16,13 +16,10 @@ class SnykAdapter:
             shell=True
         )
 
-        stdout = result.stdout or ""
-        stderr = result.stderr or ""
+        stdout = (result.stdout or "").strip()
+        stderr = (result.stderr or "").strip()
 
-        output = stdout.strip()
-
-        if not output:
-            output = stderr.strip()
+        output = stdout or stderr
 
         if not output:
             return {
@@ -31,7 +28,11 @@ class SnykAdapter:
 
         try:
             return json.loads(output)
-        except Exception:
+        except Exception as e:
+            print("\n===== JSON PARSE ERROR =====\n")
+            print(e)
+
             return {
-                "vulnerabilities": []
+                "vulnerabilities": [],
+                "raw_output": output
             }

@@ -15,7 +15,7 @@ class ReportWriter:
             name, ext = os.path.splitext(filename)
             filename = f"{name}_{timestamp}{ext}"
 
-        # path to the reports folder
+        # path to the project folder
         base_dir = os.path.abspath(
             os.path.join(os.path.dirname(__file__), "..", "..")
         )
