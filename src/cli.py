@@ -47,7 +47,7 @@ def main():
         results_folder = "results"
 
         if os.path.exists(results_folder):
-            shutil.rmtree(results_folder)
+          shutil.rmtree(results_folder)
             
 
         print("\nAnalysis completed!")
