@@ -6,8 +6,9 @@ skinparam shadowing false
 
 actor User
 participant "CLI" as CLI <<component>>
-participant "Interface Adapters" as CTRL <<component>>
-participant "Infrastructure Services" as SRV <<component>>
+participant "Controllers" as CTRL <<component>>
+participant "Adapters" as Adapters <<component>>
+participant "Services" as SRV <<component>>
 participant "Domain" as DOM <<component>>
 participant "Report" as Report <<component>>
 
@@ -17,23 +18,28 @@ activate CLI
 CLI -> CTRL : command analysis
 activate CTRL
 
-CTRL -> CTRL : execute adapters (depcheck / dirty-waters)
+CTRL -> Adapters : execute adapters (depcheck, dirty-waters, dependencySniffer, snyk)
+activate Adapters
 
-CTRL -> SRV : send analysis data
+Adapters --> CTRL : adapters
+deactivate Adapters
+
+CTRL -> SRV : filter the information that the tool provide
 activate SRV
 
 SRV -> DOM : process domain logic
 activate DOM
-DOM --> SRV : AnalysisResult
+DOM --> SRV : Analysis Result
 deactivate DOM
 
-SRV -> Report : generate report
-activate Report
-Report --> SRV : formatted report
-deactivate Report
-
-SRV --> CTRL : final result
+SRV --> CTRL : information for the Report
 deactivate SRV
+
+CTRL -> Report : generate report
+activate Report
+
+Report --> CTRL : formatted report
+deactivate Report
 
 CTRL --> CLI : response
 deactivate CTRL

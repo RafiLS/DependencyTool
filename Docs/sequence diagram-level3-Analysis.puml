@@ -5,44 +5,91 @@ skinparam monochrome true
 skinparam shadowing false
 
 actor User
-participant "CommandFormatter" as CLI <<CLI>>
-participant "Controller" as CTRL <<Interface Adapter>>
-participant "Depcheck Adapter" as DEP <<Interface Adapter>>
-participant "DirtyWaters Adapter" as DW <<Interface Adapter>>
-participant "AnalyserService" as SRV <<Infrastructure Services>>
+participant "CLI" as CLI <<CLI>>
+participant "AnalysisController" as CTRL <<Controllers>>
+participant "DepcheckAdapter" as DEP <<Adapters>>
+participant "DirtyWatersAdapter" as DW <<Adapters>>
+participant "DependencySnifferAdapter" as DS <<Adapters>>
+participant "SnykAdapter" as SS <<Adapters>>
+
+participant "DepcheckService" as SD <<Services>>
+participant "DirtyWatersService" as SDW <<Services>>
+participant "DependencySniffersService" as SDS <<Services>>
+participant "SnykService" as SSS <<Services>>
+
 database "DependencyRepository" as REPO <<repository>>
 
-participant "DependencyDTO" as DTO <<Infrastructure Services>>
 participant "Dependency" as DEPDOM <<domain>>
-participant "Risk" as RISK <<domain>>
-participant "Smell" as SMELL <<domain>>
 
 participant "ReportGenerator" as Report <<Report>>
+participant "ReportWriter" as ReportW <<Report>>
 
-User -> CLI : executeCommand("analyze")
+User -> CLI : executeCommand("dependencyTool analyze")
 activate CLI
 
 CLI -> CLI : buildCommand()
 CLI -> CTRL : executeAnalysis(command)
 activate CTRL
 
-CTRL -> DEP : runDepcheck()
+CTRL -> DEP : analyze(project_path)
 activate DEP
 DEP --> CTRL : depcheckResults
 deactivate DEP
 
-CTRL -> DW : runDirtyWaters()
+CTRL -> DW : analyze(project_path)
 activate DW
-DW --> CTRL : smellResults
+DW --> CTRL : dirtyWatersResults
 deactivate DW
 
-CTRL -> SRV : analyze(depcheckResults, smellResults)
-activate SRV
+CTRL -> DS : analyze(project_path)
+activate DS
+DS --> CTRL : dependencySnifferResults
+deactivate DS
 
-SRV -> REPO : getDependencies()
-activate REPO
-REPO --> SRV : DependencyDTO
-deactivate REPO
+CTRL -> SS : analyze(project_path)
+activate SS
+
+SS --> CTRL : snykResults
+deactivate SS
+
+CTRL -> SD : analyze(depcheck_output)
+activate SD
+SD --> CTRL : depcheckOutput
+deactivate SD
+
+CTRL -> SDW : analyze(project_repo)
+activate SDW
+SDW --> CTRL : dirtyWatersOutput
+deactivate SDW
+
+CTRL -> SDS : analyze(sniffer_raw)
+activate SDS
+SDS --> CTRL : dependencySnifferOutput
+deactivate SDS
+
+CTRL -> SSS : analyze(snyk_raw)
+activate SSS
+SSS --> CTRL : snykOutput
+deactivate SSS
+
+CTRL -> Report : generate_full_report(depcheck_results, sniffer_results, snyk_results, dirty_waters_results, dependencies)
+activate Report
+
+Report --> CTRL : fullReport
+deactivate Report
+
+CTRL -> ReportW : save(report, report_path)
+activate ReportW
+
+ReportW --> CTRL : report
+deactivate ReportW
+
+CTRL --> CLI : report
+deactivate CTRL
+
+CLI --> User : report
+deactivate CLI
+
 
 loop each Dependency
 
