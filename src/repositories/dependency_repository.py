@@ -1,4 +1,5 @@
 class DependencyRepository:
+
     def save(self, dependency):
         raise NotImplementedError
 
@@ -6,4 +7,7 @@ class DependencyRepository:
         raise NotImplementedError
 
     def find_by_name(self, name):
+        raise NotImplementedError
+
+    def exists(self, name, version, purl=None):
         raise NotImplementedError

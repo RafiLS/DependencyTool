@@ -4,6 +4,7 @@ from src.adapters.depcheck_adapter import DepcheckAdapter
 from src.adapters.dependency_sniffer_adapter import DependencySnifferAdapter
 from src.adapters.snyk_adapter import SnykAdapter
 from src.adapters.dirty_waters_adapter import DirtyWatersAdapter
+from src.adapters.syft_adapter import SyftAdapter
 
 from src.services.depcheck_service import DepcheckService
 from src.services.dependency_sniffer_service import DependencySnifferService
@@ -17,8 +18,9 @@ from src.report.report_writer import ReportWriter
 class AnalysisController:
 
     def __init__(self):
-
+        
         self.dependency_service = DependencyService()
+        self.syft_adapter = SyftAdapter()
 
         self.depcheck_adapter = DepcheckAdapter()
         self.sniffer_adapter = DependencySnifferAdapter()
@@ -39,6 +41,11 @@ class AnalysisController:
         github_repo: str,
         report_path="report.md"
     ):
+
+        sbom_path = self.dependency_service.extract_and_store_from_sbom(
+            self.syft_adapter,
+            project_path
+        )
 
         dependencies = self.dependency_service.extract_from_package_json(
             project_path

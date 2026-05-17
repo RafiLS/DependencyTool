@@ -1,11 +1,18 @@
 class Dependency:
-    def __init__(self, name, version, dep_type, source):
+
+    def __init__(
+        self,
+        name,
+        version,
+        dep_type,
+        source,
+        purl=None
+    ):
         self.name = name
         self.version = version
-        self.type = dep_type
+        self.dep_type = dep_type
         self.source = source
-
-        self.is_used = False
+        self.purl = purl
 
         self.smell_indicators = []
 
