@@ -1,7 +1,6 @@
 import json
 import os
 
-
 class DependencySnifferAdapter:
 
     def analyze(self, project_path: str):

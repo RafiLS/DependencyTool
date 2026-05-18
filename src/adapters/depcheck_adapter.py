@@ -1,10 +1,36 @@
 import subprocess
 import json
+import shutil
 
 
 class DepcheckAdapter:
 
     def analyze(self, project_path):
+
+        if shutil.which("npx") is None:
+            print("[DEPCHECK] NPX is not installed or not available in PATH.")
+            return {
+                "dependencies": [],
+                "devDependencies": [],
+                "missing": {},
+                "bloated": []
+            }
+
+        check_depcheck = subprocess.run(
+            "npx depcheck --version",
+            capture_output=True,
+            text=True,
+            shell=True
+        )
+
+        if check_depcheck.returncode != 0:
+            print("[DEPCHECK] Depcheck is not installed or not working correctly.")
+            return {
+                "dependencies": [],
+                "devDependencies": [],
+                "missing": {},
+                "bloated": []
+            }
 
         result = subprocess.run(
             "npx depcheck --json",
@@ -20,9 +46,13 @@ class DepcheckAdapter:
         stderr = (result.stderr or "").strip()
 
         if not stdout:
-            raise Exception(
-                f"Depcheck returned empty output.\nSTDERR:\n{stderr}"
-            )
+            print(f"[DEPCHECK] empty output\n{stderr}")
+            return {
+                "dependencies": [],
+                "devDependencies": [],
+                "missing": {},
+                "bloated": []
+            }
 
         try:
             data = json.loads(stdout)
@@ -36,9 +66,12 @@ class DepcheckAdapter:
 
         except json.JSONDecodeError as e:
 
-            print("\ninvalid depcheck json:")
+            print("\n[DEPCHECK] invalid JSON output")
             print(stdout)
 
-            raise Exception(
-                f"Invalid Depcheck JSON: {e}"
-            )
+            return {
+                "dependencies": [],
+                "devDependencies": [],
+                "missing": {},
+                "bloated": []
+            }

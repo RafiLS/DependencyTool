@@ -10,6 +10,8 @@ class SnykService:
 
         vulnerabilities = snyk_data.get("vulnerabilities", []) or []
 
+        seen_transitives = set()
+
         for v in vulnerabilities:
 
             title = (v.get("title") or "").lower()
@@ -18,21 +20,28 @@ class SnykService:
 
             # install scripts
             if from_list and "install" in title:
-                result["install_scripts"].append(
-                    f"{package} - {v.get('title')}"
-                )
+                item = f"{package} - {v.get('title')}"
+                if item not in result["install_scripts"]:
+                    result["install_scripts"].append(item)
 
             # license issues
             license_issue = v.get("license")
             if license_issue in {"GPL", "AGPL", "UNKNOWN"}:
-                result["license_anomalies"].append(
-                    f"{package} - {license_issue}"
-                )
+                item = f"{package} - {license_issue}"
+                if item not in result["license_anomalies"]:
+                    result["license_anomalies"].append(item)
 
             # transitive dependencies
             if from_list and len(from_list) >= 2:
+
                 chain = " > ".join(from_list)
-                result["transitive_dependencies"].append(
-                f"{package} (via {chain})"
-            )
+                key = f"{package}|{chain}"
+
+                if key not in seen_transitives:
+                    seen_transitives.add(key)
+
+                    result["transitive_dependencies"].append(
+                        f"{package} (via {chain})"
+                    )
+
         return result

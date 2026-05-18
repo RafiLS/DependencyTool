@@ -10,7 +10,7 @@ class DependencySnifferService:
 
         package = data["package_json"]
 
-        deps = package.get("dependencies", {})
+        deps = package.get( "dependencies", {})
         dev_deps = package.get("devDependencies", {})
 
         results = {
@@ -49,7 +49,6 @@ class DependencySnifferService:
             if any(op in version for op in [">", "<", "^", "~"]):
                 results["restrict_constraints"].append(f"{name}@{version}")
 
-        # scripts risk
         scripts = package.get("scripts", {})
         risky = []
 
