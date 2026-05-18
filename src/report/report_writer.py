@@ -29,4 +29,4 @@ class ReportWriter:
         with open(path, "w", encoding="utf-8") as f:
             f.write(content)
 
-        print(f"\nReport guardado em: {path}")
+        print(f"\nReport saved in: {path}")

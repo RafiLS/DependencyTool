@@ -15,7 +15,7 @@ class DirtyWatersAdapter:
             "--check-source-code",
             "--check-source-code-sha",
             "--check-deprecated",
-            "--check-forks",
+            # "--check-forks",
             "--check-provenance",
             "--check-code-signature",
             "--check-aliased-packages"
