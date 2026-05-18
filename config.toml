@@ -1,0 +1,56 @@
+[tools.depcheck]
+version_command = "npx depcheck --version"
+analyze_command = "npx depcheck --json"
+
+[smells.depcheck]
+unused_severity = "medium"
+unused_description = "Unused dependency"
+
+missing_severity = "high"
+missing_description = "Undeclared dependency"
+
+[smells.sniffer]
+
+dangerous_commands = ["rm ", "sudo ", "chmod ", "del "]
+constraint_operators = ["^", "~", ">", "<"]
+url_keywords = ["http", "git+"]
+
+[tools.snyk]
+version_command = "npx snyk --version"
+analyze_command = "npx snyk test --json"
+
+[tools.dirty_waters]
+command = "dirty-waters"
+package_manager = "npm"
+
+checks = [
+    "--check-source-code",
+    "--check-source-code-sha",
+    "--check-deprecated",
+    "--check-forks",
+    "--check-provenance",
+    "--check-code-signature",
+    "--check-aliased-packages"
+]
+
+[licenses]
+problematic_licenses = ["GPL", "AGPL", "UNKNOWN"]
+
+[version_smells]
+dangerous_versions = ["*", "latest"]
+
+unstable_prefixes = [
+    "^0.",
+    "~0."
+]
+
+normal_prefixes = [
+    "^",
+    "~"
+]
+
+high_risk_label = "HIGH"
+medium_risk_label = "MEDIUM"
+low_risk_label = "LOW"
+safe_label = "SAFE"
+unknown_label = "UNKNOWN"

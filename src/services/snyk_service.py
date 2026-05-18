@@ -1,4 +1,14 @@
+from src.config.config_loader import ConfigLoader
+
+
 class SnykService:
+
+    def __init__(self):
+
+        config = ConfigLoader()
+        smells_config = config.section("licenses")
+
+        self.problematic_licenses = smells_config["problematic_licenses"]
 
     def analyze(self, snyk_data):
 
@@ -26,7 +36,7 @@ class SnykService:
 
             # license issues
             license_issue = v.get("license")
-            if license_issue in {"GPL", "AGPL", "UNKNOWN"}:
+            if license_issue in self.problematic_licenses:
                 item = f"{package} - {license_issue}"
                 if item not in result["license_anomalies"]:
                     result["license_anomalies"].append(item)

@@ -3,27 +3,34 @@ import os
 import glob
 import shutil
 
+from src.config.config_loader import ConfigLoader
+
 
 class DirtyWatersAdapter:
 
+    def __init__(self):
+
+        config = ConfigLoader()
+
+        dirty_config = config.section("tools").get("dirty_waters", {})
+
+        self.command_name = dirty_config["command"]
+        self.package_manager = dirty_config["package_manager"]
+        self.checks = dirty_config["checks"]
+
     def analyze(self, project_repo, version="main", is_local=False):
 
-        if shutil.which("dirty-waters") is None:
+        if shutil.which(self.command_name) is None:
             print("[DIRTY WATERS] tool is not installed or not in PATH")
             return None
 
         command = [
-            "dirty-waters",
+            self.command_name,
             "-p", project_repo,
-            "-pm", "npm",
-            "--check-source-code",
-            "--check-source-code-sha",
-            "--check-deprecated",
-            "--check-forks",
-            "--check-provenance",
-            "--check-code-signature",
-            "--check-aliased-packages"
+            "-pm", self.package_manager
         ]
+
+        command += self.checks
 
         if not is_local:
             command += ["-v", version]

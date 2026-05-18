@@ -1,3 +1,4 @@
+from src.config.config_loader import ConfigLoader
 from src.services.dependency_service import DependencyService
 
 from src.adapters.depcheck_adapter import DepcheckAdapter
@@ -17,7 +18,8 @@ from src.report.report_writer import ReportWriter
 class AnalysisController:
 
     def __init__(self):
-        
+        self.config = ConfigLoader()
+
         self.dependency_service = DependencyService()
 
         self.depcheck_adapter = DepcheckAdapter()

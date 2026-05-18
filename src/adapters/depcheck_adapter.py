@@ -2,8 +2,19 @@ import subprocess
 import json
 import shutil
 
+from src.config.config_loader import ConfigLoader
+
 
 class DepcheckAdapter:
+
+    def __init__(self):
+
+        config = ConfigLoader()
+
+        depcheck_config = config.section("tools").get("depcheck", {})
+
+        self.version_command = depcheck_config["version_command"]
+        self.analyze_command = depcheck_config["analyze_command"]
 
     def analyze(self, project_path):
 
@@ -17,7 +28,7 @@ class DepcheckAdapter:
             }
 
         check_depcheck = subprocess.run(
-            "npx depcheck --version",
+            self.version_command,
             capture_output=True,
             text=True,
             shell=True
@@ -33,7 +44,7 @@ class DepcheckAdapter:
             }
 
         result = subprocess.run(
-            "npx depcheck --json",
+            self.analyze_command,
             cwd=project_path,
             capture_output=True,
             text=True,
@@ -64,7 +75,7 @@ class DepcheckAdapter:
                 "bloated": data.get("bloated", [])
             }
 
-        except json.JSONDecodeError as e:
+        except json.JSONDecodeError:
 
             print("\n[DEPCHECK] invalid JSON output")
             print(stdout)

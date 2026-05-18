@@ -2,8 +2,19 @@ import subprocess
 import json
 import shutil
 
+from src.config.config_loader import ConfigLoader
+
 
 class SnykAdapter:
+
+    def __init__(self):
+
+        config = ConfigLoader()
+
+        snyk_config = config.section("tools").get("snyk", {})
+
+        self.version_command = snyk_config["version_command"]
+        self.analyze_command = snyk_config["analyze_command"]
 
     def analyze(self, project_path: str):
 
@@ -18,7 +29,7 @@ class SnykAdapter:
 
         try:
             check = subprocess.run(
-                ["npx", "snyk", "--version"],
+                self.version_command,
                 capture_output=True,
                 text=True,
                 encoding="utf-8",
@@ -45,7 +56,7 @@ class SnykAdapter:
             }
 
         result = subprocess.run(
-            ["npx", "snyk", "test", "--json"],
+            self.analyze_command,
             cwd=project_path,
             capture_output=True,
             text=True,
