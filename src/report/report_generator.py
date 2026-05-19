@@ -43,7 +43,7 @@ class ReportGenerator:
             )
         ]
 
-        md.append(f"\n## Unused dependencies ({len(unused_deps)})")
+        md.append(f"\n## Unused dependencies/Bloated Dependencies ({len(unused_deps)})")
 
         if unused_deps:
             md.extend([f"- {d.name}" for d in unused_deps])
@@ -56,10 +56,6 @@ class ReportGenerator:
             md.extend([f"- {d.name}" for d in missing_deps])
         else:
             md.append("- None")
-
-        bloated_deps = []
-        md.append(f"\n## Bloated dependencies ({len(bloated_deps)})")
-        md.append("- None")
 
         depcheck_risks = len(unused_deps) + len(missing_deps)
         total_smells += depcheck_risks
