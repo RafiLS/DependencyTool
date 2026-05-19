@@ -16,7 +16,6 @@ class DirtyWatersAdapter:
 
         self.command_name = dirty_config["command"]
         self.package_manager = dirty_config["package_manager"]
-        self.checks = dirty_config["checks"]
 
     def analyze(self, project_repo, version="main", is_local=False):
 
@@ -27,10 +26,16 @@ class DirtyWatersAdapter:
         command = [
             self.command_name,
             "-p", project_repo,
-            "-pm", self.package_manager
-        ]
+            "-pm", self.package_manager,
 
-        command += self.checks
+            "--check-source-code",
+            "--check-source-code-sha",
+            "--check-deprecated",
+            "--check-forks",
+            "--check-provenance",
+            "--check-code-signature",
+            "--check-aliased-packages"
+        ]
 
         if not is_local:
             command += ["-v", version]

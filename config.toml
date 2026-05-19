@@ -23,15 +23,13 @@ analyze_command = "npx snyk test --json"
 command = "dirty-waters"
 package_manager = "npm"
 
-checks = [
-    "--check-source-code",
-    "--check-source-code-sha",
-    "--check-deprecated",
-    "--check-forks",
-    "--check-provenance",
-    "--check-code-signature",
-    "--check-aliased-packages"
-]
+check_source_code = true
+check_source_code_sha = true
+check_deprecated = true
+check_forks = false
+check_provenance = true
+check_code_signature = false
+check_aliased_packages = true
 
 [licenses]
 problematic_licenses = ["GPL", "AGPL", "UNKNOWN"]
