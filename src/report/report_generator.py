@@ -6,7 +6,8 @@ class ReportGenerator:
         sniffer_output,
         snyk_output,
         dirty_waters_output,
-        dependencies
+        dependencies,
+        project_meta=None
     ):
 
         md = []
@@ -18,6 +19,14 @@ class ReportGenerator:
         sniffer_output = sniffer_output or {}
         snyk_output = snyk_output or {}
         dirty_waters_output = dirty_waters_output or {}
+        project_meta = project_meta or {}
+
+        has_package_json = project_meta.get("has_package_json", False)
+        has_package_lock = project_meta.get("has_package_lock", False)
+
+        md.append("\n## Project Structure")
+        md.append(f"- package.json: {'Yes' if has_package_json else 'No'}")
+        md.append(f"- package-lock.json: {'Yes' if has_package_lock else 'No'}")
 
         # depcheck
 
@@ -114,7 +123,6 @@ class ReportGenerator:
 
         stats = dirty_waters_output.get("stats", {}) or {}
 
-        total_packages = stats.get("total_packages", 0)
         missing_source_code = stats.get("missing_source_code", 0)
         repo_404 = stats.get("repo_404", 0)
         inaccessible_sha = stats.get("inaccessible_sha", 0)
@@ -124,7 +132,8 @@ class ReportGenerator:
         forks = stats.get("forks", 0)
         aliased = stats.get("aliased", 0)
 
-        md.append(f"\n- Missing source code: {missing_source_code}")
+        md.append("\n## Dirty Waters Analysis")
+        md.append(f"- Missing source code: {missing_source_code}")
         md.append(f"- Repo 404: {repo_404}")
         md.append(f"- Inaccessible SHA: {inaccessible_sha}")
         md.append(f"- Deprecated: {deprecated}")
