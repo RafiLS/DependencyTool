@@ -128,7 +128,7 @@ class ReportGenerator:
         forks = stats.get("forks", 0)
         aliased = stats.get("aliased", 0)
 
-        md.append("\n## Dirty Waters Analysis")
+        md.append("\n")
         md.append(f"- Missing source code: {missing_source_code}")
         md.append(f"- Repo 404: {repo_404}")
         md.append(f"- Inaccessible SHA: {inaccessible_sha}")

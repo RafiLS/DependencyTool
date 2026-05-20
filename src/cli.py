@@ -9,7 +9,7 @@ from src.controllers.analysis_controller import AnalysisController
 def validate_repo(repo: str):
     pattern = r"^[a-zA-Z0-9_.-]+\/[a-zA-Z0-9_.-]+$"
     if not re.match(pattern, repo):
-        print("[ERROR] Invalid repo format. Expected owner/repo (e.g. RafiLS/TaskReact)")
+        print("[ERROR] Invalid repo format. Use owner/repo (e.g. RafiLS/TaskReact)")
         return False
     return True
 
@@ -39,25 +39,40 @@ def check_tools():
 
 def main():
 
-    parser = argparse.ArgumentParser(description="Dependency Tool CLI")
+    parser = argparse.ArgumentParser(
+        description="Dependency Analysis Tool",
+        formatter_class=argparse.RawTextHelpFormatter,
+        epilog=(
+            "Usage:\n"
+            "  dependencyTool analyze owner/repo --path \"C:\\path\\to\\project\"\n"
+            "Examples:\n"
+            "  dependencyTool analyze RafiLS/TaskReact --path \"C:\\Users\\Rafael\\Desktop\\TaskReactVite\"\n\n"
+        )
+    )
+
     subparsers = parser.add_subparsers(dest="command")
 
-    analyze_parser = subparsers.add_parser("analyze")
+    analyze_parser = subparsers.add_parser(
+        "analyze",
+        description="Runs dependency analysis on a local project.",
+        help="Analyze dependencies of a project using a GitHub repo + local path"
+    )
 
     analyze_parser.add_argument(
         "repo",
-        help="GitHub repo (e.g. RafiLS/TaskReact)"
+        help="GitHub repository in format owner/repo (e.g. RafiLS/TaskReact)"
     )
 
     analyze_parser.add_argument(
         "--path",
         required=True,
-        help="Local project path"
+        help="Path to local project (must contain package.json)"
     )
 
     analyze_parser.add_argument(
         "--output",
-        default="report.md"
+        default="report.md",
+        help="Output report file (default: report.md)"
     )
 
     args = parser.parse_args()
@@ -81,12 +96,10 @@ def main():
             report_path=args.output
         )
 
-        results_folder = "results"
+        if os.path.exists("results"):
+            shutil.rmtree("results")
 
-        if os.path.exists(results_folder):
-            shutil.rmtree(results_folder)
-
-        print("\nAnalysis completed!")
+        print("\nAnalysis completed successfully.")
 
 
 if __name__ == "__main__":
