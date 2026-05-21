@@ -73,8 +73,9 @@ class AnalysisController:
             snyk_results,
             dirty_waters_results,
             dependencies,
-            sniffer_raw.get("project_meta", {})
-)
+            sniffer_raw.get("project_meta", {}),
+            github_repo
+        )
 
         self.report_writer.save(report, report_path)
 

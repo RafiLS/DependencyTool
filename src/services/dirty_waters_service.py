@@ -1,4 +1,5 @@
 import re
+import os
 
 from src.config.config_loader import ConfigLoader
 
@@ -48,6 +49,8 @@ class DirtyWatersService:
 
         with open(report_path, "r", encoding="utf-8") as f:
             text = f.read()
+        if os.path.exists(report_path):
+            os.remove(report_path)
 
         def extract_int(pattern):
             m = re.search(pattern, text)

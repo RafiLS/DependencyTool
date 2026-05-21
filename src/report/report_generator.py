@@ -7,7 +7,8 @@ class ReportGenerator:
         snyk_output,
         dirty_waters_output,
         dependencies,
-        project_meta=None
+        project_meta=None,
+        project_repo=None
     ):
 
         md = []
@@ -20,11 +21,16 @@ class ReportGenerator:
         snyk_output = snyk_output or {}
         dirty_waters_output = dirty_waters_output or {}
         project_meta = project_meta or {}
+        project_repo = project_repo or {}
 
         has_package_json = project_meta.get("has_package_json", False)
         has_package_lock = project_meta.get("has_package_lock", False)
 
         md.append("\n## Project Structure")
+
+        if project_repo:
+            md.append(f"## Project: {project_repo}\n")
+            
         md.append(f"- package.json: {'Yes' if has_package_json else 'No'}")
         md.append(f"- package-lock.json: {'Yes' if has_package_lock else 'No'}")
 
