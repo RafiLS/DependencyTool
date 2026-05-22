@@ -9,15 +9,13 @@ from src.config.config_loader import ConfigLoader
 class DirtyWatersAdapter:
 
     def __init__(self):
-
         config = ConfigLoader()
-
         dirty_config = config.section("tools").get("dirty_waters", {})
 
         self.command_name = dirty_config["command"]
         self.package_manager = dirty_config["package_manager"]
 
-    def analyze(self, project_repo, version="main", is_local=False):
+    def analyze(self, project_repo, version=None, is_local=False):
 
         if shutil.which(self.command_name) is None:
             print("[DIRTY WATERS] tool is not installed or not in PATH")
@@ -37,7 +35,7 @@ class DirtyWatersAdapter:
             "--check-aliased-packages"
         ]
 
-        if not is_local:
+        if not is_local and version:
             command += ["-v", version]
 
         result = subprocess.run(
@@ -68,3 +66,5 @@ class DirtyWatersAdapter:
         )
 
         return latest_report
+    
+    

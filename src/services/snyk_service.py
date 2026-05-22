@@ -42,7 +42,7 @@ class SnykService:
                     result["license_anomalies"].append(item)
 
             # transitive dependencies
-            if from_list and len(from_list) >= 2:
+            if from_list and len(from_list) >= 3:
 
                 chain = " > ".join(from_list)
                 key = f"{package}|{chain}"

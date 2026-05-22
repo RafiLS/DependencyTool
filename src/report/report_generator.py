@@ -30,9 +30,8 @@ class ReportGenerator:
 
         if project_repo:
             md.append(f"## Project: {project_repo}\n")
-            
-        md.append(f"- package.json: {'Yes' if has_package_json else 'No'}")
-        md.append(f"- package-lock.json: {'Yes' if has_package_lock else 'No'}")
+            md.append(f"- package.json: {'Yes' if has_package_json else 'No'}")
+            md.append(f"- package-lock.json: {'Yes' if has_package_lock else 'No'}")
 
         # depcheck
 
@@ -133,6 +132,8 @@ class ReportGenerator:
         invalid_code_signature = stats.get("invalid_code_signature", 0)
         forks = stats.get("forks", 0)
         aliased = stats.get("aliased", 0)
+        
+        md.append("\n## Other Smells Detected")
 
         md.append("\n")
         md.append(f"- Missing source code: {missing_source_code}")

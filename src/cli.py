@@ -2,8 +2,28 @@ import argparse
 import shutil
 import os
 import re
+import threading
+import itertools
+import time
 
 from src.controllers.analysis_controller import AnalysisController
+
+
+spinner_running = False
+
+
+def spinner():
+
+    for char in itertools.cycle(["|", "/", "-", "\\"]):
+
+        if not spinner_running:
+            break
+
+        print(f"\rRunning analysis... {char}", end="", flush=True)
+
+        time.sleep(0.1)
+
+    print("\rAnalysis completed.      ")
 
 
 def validate_repo(repo: str):
@@ -90,16 +110,31 @@ def main():
 
         controller = AnalysisController()
 
+        global spinner_running
+        spinner_running = True
+
+        spinner_thread = threading.Thread(target=spinner)
+        spinner_thread.start()
+
+        start_time = time.time()
+
         controller.analyze_project(
             project_path=args.path,
             github_repo=args.repo,
             report_path=args.output
         )
 
+        end_time = time.time()
+
+        spinner_running = False
+        spinner_thread.join()
+
+        total_time = end_time - start_time
+
         if os.path.exists("results"):
             shutil.rmtree("results")
 
-        print("\nAnalysis completed successfully.")
+        print(f"\nAnalysis completed successfully in {total_time:.2f} seconds.")
 
 
 if __name__ == "__main__":

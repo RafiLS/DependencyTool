@@ -1,3 +1,4 @@
+from importlib.resources import path
 import json
 import os
 
@@ -16,7 +17,10 @@ class DependencyService:
         with open(f"{path}/package.json", encoding="utf-8") as f:
             data = json.load(f)
 
-        deps = data.get("dependencies", {})
+        deps = {
+            **data.get("dependencies", {}),
+            **data.get("devDependencies", {})
+        }
 
         for name, version in deps.items():
 

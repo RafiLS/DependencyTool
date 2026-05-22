@@ -17,8 +17,12 @@ class DepcheckService:
 
     def map_results(self, depcheck_output, dependencies):
 
-        unused = depcheck_output.get("dependencies", []) or []
-        missing = depcheck_output.get("missing", {}) or []
+        unused = (
+            depcheck_output.get("dependencies", []) +
+            depcheck_output.get("devDependencies", [])
+        ) or []
+
+        missing = depcheck_output.get("missing", {}) or {}
 
         unused_found = []
 
