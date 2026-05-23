@@ -17,7 +17,7 @@ participant "DirtyWatersService" as SDW <<Services>>
 participant "DependencySniffersService" as SDS <<Services>>
 participant "SnykService" as SSS <<Services>>
 
-database "DependencyRepository" as REPO <<repository>>
+database "DependencyService" as DepSer <<repository>>
 
 participant "Dependency" as DEPDOM <<domain>>
 
@@ -31,20 +31,32 @@ CLI -> CLI : buildCommand()
 CLI -> CTRL : executeAnalysis(command)
 activate CTRL
 
+CTRL -> DepSer : extract_from_package_json(project_path)
+activate DepSer
+
+DepSer --> CTRL: dependencies
+deactivate DepSer
+
 CTRL -> DEP : analyze(project_path)
 activate DEP
-DEP --> CTRL : depcheckResults
+DEP --> CTRL : depcheck_output
 deactivate DEP
 
-CTRL -> DW : analyze(project_path)
-activate DW
-DW --> CTRL : dirtyWatersResults
-deactivate DW
+CTRL -> SD : map_results(depcheck_output, dependencies)
+activate SD
+SD --> CTRL : depcheck_results
+deactivate SD
 
 CTRL -> DS : analyze(project_path)
 activate DS
 DS --> CTRL : dependencySnifferResults
 deactivate DS
+
+CTRL -> SDS : analyze_constraints(sniffer_raw)
+activate SDS
+SDS --> CTRL : sniffer_results
+deactivate SDS
+
 
 CTRL -> SS : analyze(project_path)
 activate SS
@@ -52,27 +64,23 @@ activate SS
 SS --> CTRL : snykResults
 deactivate SS
 
-CTRL -> SD : analyze(depcheck_output)
-activate SD
-SD --> CTRL : depcheckOutput
-deactivate SD
-
-CTRL -> SDW : analyze(project_repo)
-activate SDW
-SDW --> CTRL : dirtyWatersOutput
-deactivate SDW
-
-CTRL -> SDS : analyze(sniffer_raw)
-activate SDS
-SDS --> CTRL : dependencySnifferOutput
-deactivate SDS
-
 CTRL -> SSS : analyze(snyk_raw)
 activate SSS
-SSS --> CTRL : snykOutput
+SSS --> CTRL : snyk_results
 deactivate SSS
 
-CTRL -> Report : generate_full_report(depcheck_results, sniffer_results, snyk_results, dirty_waters_results, dependencies)
+CTRL -> DW : analyze(project_repo)
+activate DW
+DW --> CTRL : dirtyWatersResults
+deactivate DW
+
+CTRL -> SDW : analyze(dirty_waters_report)
+activate SDW
+SDW --> CTRL : dirty_waters_results
+deactivate SDW
+
+
+CTRL -> Report : generate_full_report(depcheck_results, sniffer_results, snyk_results, dirty_waters_results, dependencies, github_repo)
 activate Report
 
 Report --> CTRL : fullReport
@@ -88,56 +96,6 @@ CTRL --> CLI : report
 deactivate CTRL
 
 CLI --> User : report
-deactivate CLI
-
-
-loop each Dependency
-
-    SRV -> DEPDOM : process(dependency)
-    activate DEPDOM
-    DEPDOM --> SRV : dependency
-    deactivate DEPDOM
-
-    SRV -> RISK : calculateRisk(dependency, depcheckResults, smellResults)
-    activate RISK
-    RISK --> SRV : riskValue
-    deactivate RISK
-
-    SRV -> SMELL : analyzeStructureAndDepth(dependency)
-    activate SMELL
-    SMELL --> SRV : result
-    deactivate SMELL
-
-    SRV -> SMELL : detectDuplicateDependencies(dependency)
-    activate SMELL
-    SMELL --> SRV : result
-    deactivate SMELL
-
-    SRV -> SMELL : detectBloatedDependencies(dependency)
-    activate SMELL
-    SMELL --> SRV : result
-    deactivate SMELL
-
-    SRV -> SMELL : checkMaintenanceStatus(dependency)
-    activate SMELL
-    SMELL --> SRV : result
-    deactivate SMELL
-
-end
-SRV -> SRV : mergeToolResults(depcheckResults, smellResults)
-
-SRV -> Report : generateReport(analysisResult)
-activate Report
-Report --> SRV : markdownReport
-deactivate Report
-
-SRV --> CTRL : analysisResult
-deactivate SRV
-
-CTRL --> CLI : response
-deactivate CTRL
-
-CLI --> User : displayReport()
 deactivate CLI
 
 @enduml
