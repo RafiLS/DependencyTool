@@ -5,9 +5,12 @@ import re
 import threading
 import itertools
 import time
-
 from src.controllers.analysis_controller import AnalysisController
 
+from src.services.depcheck_service import DepcheckService
+from src.services.snyk_service import SnykService
+from src.services.dirty_waters_service import DirtyWatersService
+from src.services.dependency_sniffer_service import DependencySnifferService
 
 spinner_running = False
 

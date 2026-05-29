@@ -1,10 +1,16 @@
 from src.config.config_loader import ConfigLoader
+from src.domain.i_analysis_tool import IAnalysisTool
+from src.domain.tool_registry import ToolRegistry
 from src.domain.smell_indicator import SmellIndicator
+from src.adapters.depcheck_adapter import DepcheckAdapter
 
 
-class DepcheckService:
+@ToolRegistry.register
+class DepcheckService(IAnalysisTool):
 
     def __init__(self):
+
+        self._adapter = DepcheckAdapter()
 
         config = ConfigLoader()
         depcheck_config = config.section("smells").get("depcheck", {})
@@ -15,7 +21,12 @@ class DepcheckService:
         self.missing_severity = depcheck_config.get("missing_severity", "high")
         self.missing_description = depcheck_config.get("missing_description", "Undeclared dependency")
 
-    def map_results(self, depcheck_output, dependencies):
+    def name(self) -> str:
+        return "depcheck"
+
+    def analyze(self, project_path, github_repo, dependencies):
+
+        depcheck_output = self._adapter.analyze(project_path)
 
         unused = (
             depcheck_output.get("dependencies", []) +
@@ -24,17 +35,12 @@ class DepcheckService:
 
         missing = depcheck_output.get("missing", {}) or {}
 
-        unused_found = []
-
         for dep in dependencies:
 
             dep.is_used = True
 
-            # unused dependency
             if dep.name in unused:
                 dep.is_used = False
-                unused_found.append(dep.name)
-
                 dep.add_smell_indicator(
                     SmellIndicator(
                         severity=self.unused_severity,
@@ -42,7 +48,6 @@ class DepcheckService:
                     )
                 )
 
-            # missing dependency
             if dep.name in missing:
                 dep.add_smell_indicator(
                     SmellIndicator(

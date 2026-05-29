@@ -1,16 +1,27 @@
 from src.config.config_loader import ConfigLoader
+from src.domain.i_analysis_tool import IAnalysisTool
+from src.domain.tool_registry import ToolRegistry
+from src.adapters.snyk_adapter import SnykAdapter
 
 
-class SnykService:
+@ToolRegistry.register
+class SnykService(IAnalysisTool):
 
     def __init__(self):
+
+        self._adapter = SnykAdapter()
 
         config = ConfigLoader()
         smells_config = config.section("licenses")
 
         self.problematic_licenses = smells_config["problematic_licenses"]
 
-    def analyze(self, snyk_data):
+    def name(self) -> str:
+        return "snyk"
+
+    def analyze(self, project_path, github_repo, dependencies):
+
+        snyk_data = self._adapter.analyze(project_path)
 
         result = {
             "install_scripts": [],

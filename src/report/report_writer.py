@@ -4,29 +4,36 @@ from datetime import datetime
 
 class ReportWriter:
 
-    def save(self, content, filename=None):
+    def save(self, content, project_name, filename=None, base_dir_name="save_reports"):
 
-        # time stamp for the file name
         now = datetime.now()
         timestamp = now.strftime("%d-%m-%Y_%H-%M-%S")
+
+        project_name = project_name.replace("/", "_")
+
         if filename is None:
-            filename = f"Report_{timestamp}.md"
+            filename = f"report_{timestamp}.md"
         else:
             name, ext = os.path.splitext(filename)
             filename = f"{name}_{timestamp}{ext}"
 
-        # path to the project folder
         base_dir = os.path.abspath(
             os.path.join(os.path.dirname(__file__), "..", "..")
         )
 
-        folder = os.path.join(base_dir, "save_reports")
+        project_folder = os.path.join(
+            base_dir,
+            base_dir_name,
+            project_name
+        )
 
-        os.makedirs(folder, exist_ok=True)
+        os.makedirs(project_folder, exist_ok=True)
 
-        path = os.path.join(folder, filename)
+        path = os.path.join(project_folder, filename)
 
         with open(path, "w", encoding="utf-8") as f:
             f.write(content)
 
         print(f"\nReport saved in: {path}")
+
+        return path

@@ -17,7 +17,7 @@ class DependencySnifferAdapter:
             with open(package_json_path, "r", encoding="utf-8") as f:
                 package_json = json.load(f)
 
-        lock_data = None
+        lock_data = {}
 
         if has_package_lock:
             with open(lock_path, "r", encoding="utf-8") as f:
@@ -26,7 +26,6 @@ class DependencySnifferAdapter:
         return {
             "package_json": package_json,
             "lock_file": lock_data,
-
             "project_meta": {
                 "has_package_json": has_package_json,
                 "has_package_lock": has_package_lock
