@@ -17,7 +17,7 @@ participant "DirtyWatersService" as SDW <<Services>>
 participant "DependencySniffersService" as SDS <<Services>>
 participant "SnykService" as SSS <<Services>>
 
-database "DependencyService" as DepSer <<repository>>
+participant "DependencyService" as DepSer <<Services>>
 
 participant "Dependency" as DEPDOM <<domain>>
 
@@ -33,6 +33,12 @@ activate CTRL
 
 CTRL -> DepSer : extract_from_package_json(project_path)
 activate DepSer
+
+DepSer -> DEPDOM : add(dependency)
+    activate DEPDOM
+
+DEPDOM -> DepSer : dependency
+    deactivate DEPDOM
 
 DepSer --> CTRL: dependencies
 deactivate DepSer

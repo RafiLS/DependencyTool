@@ -3,6 +3,7 @@ import pytest
 
 from src.adapters.dependency_sniffer_adapter import DependencySnifferAdapter
 
+
 class TestDependencySnifferAdapter:
 
     def test_no_files_exist(self, tmp_path):
@@ -11,7 +12,7 @@ class TestDependencySnifferAdapter:
         result = adapter.analyze(str(tmp_path))
 
         assert result["package_json"] == {}
-        assert result["lock_file"] is None
+        assert result["lock_file"] == {}
         assert result["project_meta"] == {
             "has_package_json": False,
             "has_package_lock": False
@@ -28,7 +29,7 @@ class TestDependencySnifferAdapter:
         result = adapter.analyze(str(tmp_path))
 
         assert result["package_json"] == package_data
-        assert result["lock_file"] is None
+        assert result["lock_file"] == {}
         assert result["project_meta"]["has_package_json"] is True
         assert result["project_meta"]["has_package_lock"] is False
 
@@ -53,8 +54,15 @@ class TestDependencySnifferAdapter:
         package_data = {"name": "app"}
         lock_data = {"lockfileVersion": 2}
 
-        (tmp_path / "package.json").write_text(json.dumps(package_data), encoding="utf-8")
-        (tmp_path / "package-lock.json").write_text(json.dumps(lock_data), encoding="utf-8")
+        (tmp_path / "package.json").write_text(
+            json.dumps(package_data),
+            encoding="utf-8"
+        )
+
+        (tmp_path / "package-lock.json").write_text(
+            json.dumps(lock_data),
+            encoding="utf-8"
+        )
 
         result = adapter.analyze(str(tmp_path))
 
@@ -69,7 +77,10 @@ class TestDependencySnifferAdapter:
     def test_invalid_json_handling_not_crashing(self, tmp_path):
         adapter = DependencySnifferAdapter()
 
-        (tmp_path / "package.json").write_text("{invalid json", encoding="utf-8")
+        (tmp_path / "package.json").write_text(
+            "{invalid json",
+            encoding="utf-8"
+        )
 
         with pytest.raises(json.JSONDecodeError):
             adapter.analyze(str(tmp_path))

@@ -2,6 +2,7 @@ from unittest.mock import patch, mock_open
 
 from src.report.report_writer import ReportWriter
 
+
 class TestReportWriter:
 
     @patch("builtins.open", new_callable=mock_open)
@@ -17,12 +18,24 @@ class TestReportWriter:
         mock_makedirs,
         mock_file
     ):
+        # Arrange
         writer = ReportWriter()
 
-        writer.save("content")
+        # Act
+        result = writer.save(
+            content="content",
+            project_name="my_project"
+        )
 
+        # Assert
         mock_makedirs.assert_called_once()
         mock_file.assert_called_once()
+
+        handle = mock_file()
+        handle.write.assert_called_once_with("content")
+
+        assert "my_project" in result
+        assert result.endswith(".md")
 
     @patch("builtins.open", new_callable=mock_open)
     @patch("os.makedirs")
@@ -37,8 +50,22 @@ class TestReportWriter:
         mock_makedirs,
         mock_file
     ):
+        # Arrange
         writer = ReportWriter()
 
-        writer.save("content", "report.md")
+        # Act
+        result = writer.save(
+            content="content",
+            project_name="my_project",
+            filename="report.md"
+        )
 
+        # Assert
+        mock_makedirs.assert_called_once()
         mock_file.assert_called_once()
+
+        handle = mock_file()
+        handle.write.assert_called_once_with("content")
+
+        assert "my_project" in result
+        assert result.endswith(".md")

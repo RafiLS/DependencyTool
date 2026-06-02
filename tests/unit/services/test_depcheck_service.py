@@ -1,5 +1,5 @@
 from src.services.depcheck_service import DepcheckService
-from src.domain.smell_indicator import SmellIndicator
+
 
 class FakeDependency:
     def __init__(self, name):
@@ -10,6 +10,7 @@ class FakeDependency:
     def add_smell_indicator(self, smell):
         self.smell_indicators.append(smell)
 
+
 class TestDepcheckService:
 
     def test_marks_unused_dependency(self):
@@ -18,19 +19,16 @@ class TestDepcheckService:
 
         deps = [FakeDependency("lodash")]
 
-        depcheck_output = {
+        service._adapter.analyze = lambda _: {
             "dependencies": ["lodash"],
-            "missing": {}
+            "missing": []
         }
-
-        result = service.map_results(depcheck_output, deps)
+        result = service.analyze("/fake", "repo", deps)
 
         dep = result[0]
-
         assert dep.is_used is False
         assert len(dep.smell_indicators) == 1
         assert dep.smell_indicators[0].description == service.unused_description
-
 
     def test_detects_missing_dependency(self):
 
@@ -38,15 +36,13 @@ class TestDepcheckService:
 
         deps = [FakeDependency("react")]
 
-        depcheck_output = {
+        service._adapter.analyze = lambda _: {
             "dependencies": [],
             "missing": ["react"]
         }
-
-        result = service.map_results(depcheck_output, deps)
+        result = service.analyze("/fake", "repo", deps)
 
         dep = result[0]
-
         assert len(dep.smell_indicators) == 1
         assert dep.smell_indicators[0].description == service.missing_description
 
@@ -56,19 +52,16 @@ class TestDepcheckService:
 
         deps = [FakeDependency("axios")]
 
-        depcheck_output = {
+        service._adapter.analyze = lambda _: {
             "dependencies": ["axios"],
             "missing": ["axios"]
         }
-
-        result = service.map_results(depcheck_output, deps)
+        result = service.analyze("/fake", "repo", deps)
 
         dep = result[0]
-
         assert len(dep.smell_indicators) == 2
 
         severities = {s.severity for s in dep.smell_indicators}
-
         assert service.unused_severity in severities
         assert service.missing_severity in severities
 
@@ -78,18 +71,15 @@ class TestDepcheckService:
 
         deps = [FakeDependency("express")]
 
-        depcheck_output = {
+        service._adapter.analyze = lambda _: {
             "dependencies": [],
             "missing": []
         }
-
-        result = service.map_results(depcheck_output, deps)
+        result = service.analyze("/fake", "repo", deps)
 
         dep = result[0]
-
         assert dep.is_used is True
         assert dep.smell_indicators == []
-
 
     def test_multiple_dependencies_mixed_cases(self):
 
@@ -101,13 +91,12 @@ class TestDepcheckService:
             FakeDependency("c")
         ]
 
-        depcheck_output = {
+        service._adapter.analyze = lambda _: {
             "dependencies": ["a", "c"],
             "missing": ["b"]
         }
 
-        result = service.map_results(depcheck_output, deps)
-
+        result = service.analyze("/fake", "repo", deps)
         a, b, c = result
 
         assert a.is_used is False
