@@ -1,0 +1,124 @@
+@startuml
+left to right direction
+
+class AnalysisController {
+    -
+    - dependency_service : DependencyService
+    - depcheck_adapter: DepcheckAdapter
+    - depcheck_service: DepcheckService
+    - dependency_sniffer_adapter: DependencySnifferAdapter
+    - dependency_sniffer_service: DependencySnifferService
+    - dirty_waters_adapter: DirtyWatersAdapter
+    - dirty_waters_service: DirtyWatersService
+    - snyk_adapter: SnykAdapter
+    - snyk_service: SnykService
+    + analyze_project(project_path, github_repo, report_path)
+}
+
+class DependencyService {
+    +extract_from_package_json(project_path)
+}
+
+class Dependency {
+    -name : str
+    -version : str
+    -dep_type : str
+    -source : str
+    -purl : str
+    -smell_indicators : list
+
+    +add_smell_indicator(smell)
+    +has_smells()
+}
+
+
+class DepcheckService {
+    -_adapter: DepcheckAdapter
+    +analyze(self, project_path, github_repo, dependencies)
+}
+
+DepcheckService --> SmellIndicator
+
+class DepcheckAdapter {
+    -depcheck_config
+    +analyze(project_path)
+}
+
+
+class DependencySnifferService {
+    -_adapter: DependencySnifferAdapter
+    -classifier : VersionClassifier
+    +analyze(self, project_path, github_repo, dependencies)
+}
+
+DependencySnifferService --> VersionClassifier
+
+class DependencySnifferAdapter {
+    +analyze(project_path)
+}
+
+
+class DirtyWatersService {
+    -_adapter: DirtyWatersAdapter
+    +analyze(self, project_path, github_repo, dependencies)
+}
+
+class DirtyWatersAdapter {
+    -dirty_config
+    +analyze(project_repo, version)
+}
+
+
+class SnykService {
+    -_adapter: SnykAdapter
+    +analyze(self, project_path, github_repo, dependencies)
+}
+
+class SnykAdapter {
+    -snyk_config
+    +analyze(project_path)
+}
+
+
+
+
+
+class SmellIndicator {
+    -severity : str
+    -description : str
+    -smells : list
+    +add_smell(smell)
+}
+class VersionClassifier{
+    -smells_config
+    +classify(version)
+}
+
+
+class ReportWriter{
+    +save(content, project_name, filename, base_dir_name)
+}
+class ReportGenerator{
+    +generate_full_report(results,dependencies,project_meta,project_repo,sbom,sbom_path)
+}
+AnalysisController --> ReportGenerator : uses
+AnalysisController --> ReportWriter : uses
+
+AnalysisController --> DepcheckService : uses
+AnalysisController --> DepcheckAdapter : uses
+
+AnalysisController --> DependencySnifferService : uses
+AnalysisController --> DependencySnifferAdapter : uses
+
+AnalysisController --> DirtyWatersService : uses
+AnalysisController --> DirtyWatersAdapter : uses
+
+AnalysisController --> SnykService : uses
+AnalysisController --> SnykAdapter : uses
+
+
+AnalysisController --> DependencyService : uses
+DependencyService --> Dependency : creates
+
+
+@enduml

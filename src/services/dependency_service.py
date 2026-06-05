@@ -5,9 +5,6 @@ from src.domain.dependency import Dependency
 
 class DependencyService:
 
-    def __init__(self, dependency_repository=None):
-        self.dependency_repository = dependency_repository
-
     def extract_from_package_json(self, project_path):
 
         dependencies = []

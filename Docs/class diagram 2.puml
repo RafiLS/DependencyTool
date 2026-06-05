@@ -1,0 +1,137 @@
+@startuml
+
+class AnalysisController {
+    - tools : List[IAnalysisTool]
+    - dependency_service : DependencyService
+    + syft_service : SyftService()
+    + analyze_project(project_path, github_repo, report_path)
+}
+
+class DependencyService {
+    +extract_from_package_json(project_path)
+}
+
+class Dependency {
+    -name : str
+    -version : str
+    -dep_type : str
+    -source : str
+    -purl : str
+    -smell_indicators : list
+
+    +add_smell_indicator(smell)
+    +has_smells()
+}
+
+class ToolRegistry {
+    -tools : list
+    + register(cls, tool_class)
+    + get_all(cls)
+}
+
+interface IAnalysisTool {
+    name()
+    analyze(project_path, github_repo, dependencies)
+}
+
+class DepcheckService {
+    -_adapter: DepcheckAdapter
+    +name()
+    +analyze(self, project_path, github_repo, dependencies)
+}
+
+DepcheckService -> SmellIndicator
+
+class DepcheckAdapter {
+    -depcheck_config
+    +analyze(project_path)
+}
+
+DepcheckService --> DepcheckAdapter
+
+class DependencySnifferService {
+    -_adapter: DependencySnifferAdapter
+    -classifier : VersionClassifier
+    +name()
+    +analyze(self, project_path, github_repo, dependencies)
+}
+
+DependencySnifferService -> VersionClassifier
+
+class DependencySnifferAdapter {
+    +analyze(project_path)
+}
+
+DependencySnifferService --> DependencySnifferAdapter
+
+class DirtyWatersService {
+    -_adapter: DirtyWatersAdapter
+    +name()
+    +analyze(self, project_path, github_repo, dependencies)
+}
+
+class DirtyWatersAdapter {
+    -dirty_config
+    +analyze(project_repo, version)
+}
+
+DirtyWatersService --> DirtyWatersAdapter
+
+class SnykService {
+    -_adapter: SnykAdapter
+    +name()
+    +analyze(self, project_path, github_repo, dependencies)
+}
+
+class SnykAdapter {
+    -snyk_config
+    +analyze(project_path)
+}
+
+SnykService --> SnykAdapter
+
+class SyftService{
+    analyze(self, sbom_path)
+}
+class SyftAdapter{
+    - output_dir : str
+    +generate_sbom(project_path)
+}
+
+
+class SmellIndicator {
+    -severity : str
+    -description : str
+    -smells : list
+    +add_smell(smell)
+}
+class VersionClassifier{
+    -smells_config
+    +classify(version)
+}
+
+class ReportWriter{
+    +save(content, project_name, filename, base_dir_name)
+}
+class ReportGenerator{
+    +generate_full_report(results,dependencies,project_meta,project_repo,sbom,sbom_path)
+}
+AnalysisController --> ReportGenerator
+AnalysisController -> ReportWriter
+
+IAnalysisTool <|.. DepcheckService
+IAnalysisTool <|.. DependencySnifferService
+IAnalysisTool <|.. DirtyWatersService
+
+IAnalysisTool <|.. SnykService
+
+AnalysisController --> SyftService : uses
+AnalysisController --> SyftAdapter : uses
+
+AnalysisController --> DependencyService : uses
+DependencyService --> Dependency : creates
+AnalysisController ..> ToolRegistry : get all
+
+ToolRegistry --> IAnalysisTool : uses
+
+@enduml

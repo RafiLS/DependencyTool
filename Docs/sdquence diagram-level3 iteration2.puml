@@ -1,0 +1,158 @@
+@startuml
+
+title Sequence Diagram - Dependency Risk Analysis (Level 3)
+skinparam monochrome true
+skinparam shadowing false
+
+actor User
+participant "CLI" as CLI <<CLI>>
+participant "AnalysisController" as CTRL <<Controller>>
+
+participant "SyftAdapter" as syftA <<Adapter>>
+
+participant "DepcheckService" as SD <<Service>>
+participant "DirtyWatersService" as SDW <<Service>>
+participant "DependencySnifferService" as SDS <<Service>>
+participant "SnykService" as SSS <<Service>>
+
+participant "DepcheckAdapter" as DEP <<Adapter>>
+participant "DirtyWatersAdapter" as DW <<Adapter>>
+participant "DependencySnifferAdapter" as DS <<Adapter>>
+participant "SnykAdapter" as SS <<Adapter>>
+
+participant "SyftService" as syftS <<Service>>
+
+
+participant "ToolRegistry" as Tool
+participant "DependencyService" as DepSer <<Service>>
+
+participant "Dependency" as DEPDOM <<domain>>
+participant "VersionClassifier" as VC
+participant "ReportGenerator" as Report <<Report>>
+participant "ReportWriter" as ReportW <<Report>>
+
+User -> CLI : executeCommand("dependencyTool analyze")
+activate CLI
+
+CLI -> CTRL : analyze_project(project_path, github_repo, report_path)
+activate CTRL
+
+CTRL -> Tool : get_all()
+activate Tool
+
+Tool --> CTRL : tools
+deactivate Tool
+
+CTRL -> syftA : generate_sbom(project_path)
+activate syftA
+
+syftA --> CTRL : sbom_path
+deactivate syftA
+
+CTRL -> syftS : analyze(sbom_path)
+activate syftS
+
+syftS --> CTRL : sbom_data
+deactivate syftS
+
+
+CTRL -> DepSer : extract_from_package_json(project_path)
+activate DepSer
+
+DepSer -> DEPDOM : Dependency(name, version, dep_type, source)
+    activate DEPDOM
+
+DEPDOM -> DepSer : dependency
+    deactivate DEPDOM
+
+DepSer --> CTRL: dependencies
+deactivate DepSer
+
+
+
+
+CTRL -> SD : analyze(project_path,github_repo,dependencies)
+activate SD
+
+SD -> DEP : analyze(project_path)
+activate DEP
+
+DEP --> SD : depcheck_output
+deactivate DEP
+
+SD -> DEPDOM : add_smell_indicator(SmellIndicator)
+activate DEPDOM
+
+DEPDOM --> SD : smellIndicator
+deactivate DEPDOM
+
+SD --> CTRL : results
+deactivate
+
+
+
+CTRL -> SDW : analyze(project_path,github_repo,dependencies)
+activate SDW
+
+SDW -> DW : analyze(project_path)
+activate DW
+
+DW --> SDW : report_file
+deactivate DW
+
+SDW --> CTRL : results
+deactivate
+
+
+CTRL -> SSS : analyze(project_path,github_repo,dependencies)
+activate SSS
+
+SSS -> SS : analyze(project_path)
+activate SS
+
+SS --> SSS : snyk_data
+deactivate SS
+
+SSS --> CTRL : results
+deactivate
+
+
+
+CTRL -> SDS : analyze(project_path,github_repo,dependencies)
+activate SDS
+
+SDS -> DS : analyze(project_path)
+activate DS
+
+DS --> SDS : data
+deactivate DS
+
+SDS ->  VC : classify(version)
+activate VC
+
+VC --> SDS : risk
+deactivate VC
+
+SDS --> CTRL : results
+deactivate
+
+
+CTRL -> Report : generate_full_report(results, dependencies, project_repo, sbom, sbom_path)
+activate Report
+
+Report --> CTRL : fullReport
+deactivate Report
+
+CTRL -> ReportW : save(report, project_name, filename)
+activate ReportW
+
+ReportW --> CTRL : path
+deactivate ReportW
+
+CTRL --> CLI : report
+deactivate CTRL
+
+CLI --> User : report
+deactivate CLI
+
+@enduml

@@ -6,18 +6,18 @@ skinparam shadowing false
 
 actor User
 participant "CLI" as CLI <<CLI>>
-participant "AnalysisController" as CTRL <<Controllers>>
-participant "DepcheckAdapter" as DEP <<Adapters>>
-participant "DirtyWatersAdapter" as DW <<Adapters>>
-participant "DependencySnifferAdapter" as DS <<Adapters>>
-participant "SnykAdapter" as SS <<Adapters>>
+participant "AnalysisController" as CTRL <<Controller>>
+participant "DepcheckAdapter" as DEP <<Adapter>>
+participant "DirtyWatersAdapter" as DW <<Adapter>>
+participant "DependencySnifferAdapter" as DS <<Adapter>>
+participant "SnykAdapter" as SS <<Adapter>>
 
-participant "DepcheckService" as SD <<Services>>
-participant "DirtyWatersService" as SDW <<Services>>
-participant "DependencySniffersService" as SDS <<Services>>
-participant "SnykService" as SSS <<Services>>
+participant "DepcheckService" as SD <<Service>>
+participant "DirtyWatersService" as SDW <<Service>>
+participant "DependencySnifferService" as SDS <<Service>>
+participant "SnykService" as SSS <<Service>>
 
-participant "DependencyService" as DepSer <<Services>>
+participant "DependencyService" as DepSer <<Service>>
 
 participant "Dependency" as DEPDOM <<domain>>
 
@@ -27,14 +27,13 @@ participant "ReportWriter" as ReportW <<Report>>
 User -> CLI : executeCommand("dependencyTool analyze")
 activate CLI
 
-CLI -> CLI : buildCommand()
-CLI -> CTRL : executeAnalysis(command)
+CLI -> CTRL : analyze_project(project_path, github_repo, report_path)
 activate CTRL
 
 CTRL -> DepSer : extract_from_package_json(project_path)
 activate DepSer
 
-DepSer -> DEPDOM : add(dependency)
+DepSer -> DEPDOM : Dependency(name, version, dep_type, source)
     activate DEPDOM
 
 DEPDOM -> DepSer : dependency
@@ -95,7 +94,7 @@ deactivate Report
 CTRL -> ReportW : save(report, report_path)
 activate ReportW
 
-ReportW --> CTRL : report
+ReportW --> CTRL : path
 deactivate ReportW
 
 CTRL --> CLI : report

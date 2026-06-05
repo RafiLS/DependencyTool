@@ -3,7 +3,7 @@ from src.domain.i_analysis_tool import IAnalysisTool
 from src.domain.tool_registry import ToolRegistry
 from src.domain.smell_indicator import SmellIndicator
 from src.adapters.depcheck_adapter import DepcheckAdapter
-
+from src.domain.dependency import Dependency
 
 @ToolRegistry.register
 class DepcheckService(IAnalysisTool):
