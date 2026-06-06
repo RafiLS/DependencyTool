@@ -13,19 +13,27 @@ class DepcheckAdapter:
 
         depcheck_config = config.section("tools").get("depcheck", {})
 
+        self.required_tools = depcheck_config.get("required_tools", [])
         self.version_command = depcheck_config["version_command"]
         self.analyze_command = depcheck_config["analyze_command"]
 
     def analyze(self, project_path):
 
-        if shutil.which("npx") is None:
-            print("[DEPCHECK] NPX is not installed or not available in PATH.")
-            return {
-                "dependencies": [],
-                "devDependencies": [],
-                "missing": {},
-                "bloated": []
-            }
+        for tool in self.required_tools:
+
+            if shutil.which(tool) is None:
+
+                print(
+                    f"[DEPCHECK] {tool.upper()} is not installed "
+                    f"or not available in PATH."
+                )
+
+                return {
+                    "dependencies": [],
+                    "devDependencies": [],
+                    "missing": {},
+                    "bloated": []
+                }
 
         check_depcheck = subprocess.run(
             self.version_command,
@@ -69,6 +77,7 @@ class DepcheckAdapter:
             data = json.loads(stdout)
 
             print("\n   [DEPCHECK] tool executed successfully")
+
             return {
                 "dependencies": data.get("dependencies", []),
                 "devDependencies": data.get("devDependencies", []),

@@ -1,4 +1,5 @@
 [tools.depcheck]
+required_tools = ["node", "npm", "npx"]
 version_command = "npx depcheck --version"
 analyze_command = "npx depcheck --json"
 
