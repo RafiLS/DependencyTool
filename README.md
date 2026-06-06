@@ -84,7 +84,7 @@ DependencyTool/
 ├── env/
 ├── Docs/
 ├── save_reports/
-├── src//
+├── src/
 ├── tests/
 ├── config.toml
 └── README.md
@@ -99,6 +99,9 @@ The application performs local dependency analysis while also accessing GitHub r
 ```bash
 dependencyTool analyze <owner/repository> --path <local_project_path>
 ```
+# Report
+
+After running the tool, the smells results are in the report in the "save_reports" directory, which contains the name of the analyzed project along with the report and the SBOM code.
 
 # General System Requirements
 
@@ -128,7 +131,7 @@ Possible future improvements include:
 
 - support for additional dependency ecosystems;
 - detection of new *Software Supply Chain Smells*;
-- generation of graphical reports and dashboards;
+- new tools for smells detection.
 - integration with CI/CD pipelines;
 - automatic dependency risk scoring;
 - support for additional manifest formats.

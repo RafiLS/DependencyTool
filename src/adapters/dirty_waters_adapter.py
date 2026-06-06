@@ -64,7 +64,7 @@ class DirtyWatersAdapter:
             reports,
             key=os.path.getctime
         )
-
+        print(f"\n   [DIRTY WATERS] tool executed successfully")
         return latest_report
     
     

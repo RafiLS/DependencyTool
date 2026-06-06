@@ -22,7 +22,8 @@ class DependencySnifferAdapter:
         if has_package_lock:
             with open(lock_path, "r", encoding="utf-8") as f:
                 lock_data = json.load(f)
-
+        print(f"\n   [DEPENDENCY SNIFFER] analyzed tool executed successfully")
+              
         return {
             "package_json": package_json,
             "lock_file": lock_data,

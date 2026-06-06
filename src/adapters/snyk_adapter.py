@@ -81,7 +81,7 @@ class SnykAdapter:
 
         try:
             data = json.loads(output)
-
+            print("\n   [SNYK] tool executed successfully")
             return {
                 "status": "success",
                 "tool": "snyk",

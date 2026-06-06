@@ -57,7 +57,7 @@ class DepcheckAdapter:
         stderr = (result.stderr or "").strip()
 
         if not stdout:
-            print(f"[DEPCHECK] empty output\n{stderr}")
+            print(f"\n[DEPCHECK] empty output\n{stderr}")
             return {
                 "dependencies": [],
                 "devDependencies": [],
@@ -68,6 +68,7 @@ class DepcheckAdapter:
         try:
             data = json.loads(stdout)
 
+            print("\n   [DEPCHECK] tool executed successfully")
             return {
                 "dependencies": data.get("dependencies", []),
                 "devDependencies": data.get("devDependencies", []),
